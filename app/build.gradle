@@ -1,0 +1,86 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'  //kapt3插件
+android {
+    compileSdkVersion 29
+
+    defaultConfig {
+        applicationId "me.xyp.audioandvedio"
+        minSdkVersion 18
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        //cmake工具
+        externalNativeBuild {
+            cmake {
+                cppFlags ""
+            }
+        }
+
+
+
+        ndk {
+            moduleName "jni-test"
+            // 设置支持的SO库架构
+            abiFilters  'armeabi-v7a'
+        }
+        sourceSets {
+            main {
+                //mk
+//                jni.srcDirs = []
+                //使用mk生成的so包需要指定路径
+//                jniLibs.srcDirs = ['libs']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        //cmake工具
+        cmake{
+            path 'CMakeLists.txt'
+        }
+
+        //mk
+//        ndkBuild {
+//            path 'src/main/jni/Android.mk'
+//        }
+    }
+
+
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    //androidx
+    implementation rootProject.ext.androidxLibs
+    // 网络请求库
+    implementation rootProject.ext.networkLibs
+    //GlideOkHttp
+    implementation(rootProject.ext.glideOkhttp) {
+        exclude group: 'glide-parent'
+    }
+    // RxJava2
+    implementation rootProject.ext.rxJavaLibs
+    implementation rootProject.ext.otherLibs
+    // APT dependencies(Kotlin内置的注解处理器)
+    kapt rootProject.ext.annotationProcessorLibs
+
+    //leakCanary
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.5'
+
+}
