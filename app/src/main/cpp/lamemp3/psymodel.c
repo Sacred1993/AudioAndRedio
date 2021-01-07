@@ -4,7 +4,7 @@
  *      Copyright (c) 1999-2000 Mark Taylor
  *      Copyright (c) 2001-2002 Naoki Shibata
  *      Copyright (c) 2000-2003 Takehiro Tominaga
- *      Copyright (c) 2000-2012 Robert Hegemann
+ *      Copyright (c) 2000-2011 Robert Hegemann
  *      Copyright (c) 2000-2005 Gabriel Bouvigne
  *      Copyright (c) 2000-2005 Alexander Leidinger
  *
@@ -24,7 +24,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/* $Id: psymodel.c,v 1.216 2017/09/06 19:38:23 aleidinger Exp $ */
+/* $Id: psymodel.c,v 1.209 2011/05/24 20:45:55 robert Exp $ */
 
 
 /*
@@ -144,8 +144,7 @@ blocktype_d[2]        block type to use for previous granule
 # include <config.h>
 #endif
 
-#include <float.h>
-
+#include <stdlib.h>
 #include "lame.h"
 #include "machine.h"
 #include "encoder.h"
@@ -247,12 +246,9 @@ psycho_loudness_approx(FLOAT const *energy, FLOAT const *eql_w)
 #define I2LIMIT 23      /* as in if(i>24) -> changed 23 */
 #define MLIMIT  15      /* as in if(m<15) */
 
-/* pow(10, (I1LIMIT + 1) / 16.0); */
-static const FLOAT ma_max_i1 = 3.6517412725483771;
-/* pow(10, (I2LIMIT + 1) / 16.0); */
-static const FLOAT ma_max_i2 = 31.622776601683793;
-/* pow(10, (MLIMIT) / 10.0); */
-static const FLOAT ma_max_m  = 31.622776601683793;
+static FLOAT ma_max_i1;
+static FLOAT ma_max_i2;
+static FLOAT ma_max_m;
 
     /*This is the masking table:
        According to tonality, values are going from 0dB (TMN)
@@ -273,7 +269,7 @@ static const FLOAT tab[] = {
 };
 
 static const int tab_mask_add_delta[] = { 2, 2, 2, 1, 1, 1, 0, 0, -1 };
-#define STATIC_ASSERT_EQUAL_DIMENSION(A,B) enum{static_assert_##A=1/((dimension_of(A) == dimension_of(B))?1:0)}
+#define STATIC_ASSERT_EQUAL_DIMENSION(A,B) {extern char static_assert_##A[dimension_of(A) == dimension_of(B) ? 1 : -1];(void) static_assert_##A;}
 
 inline static int
 mask_add_delta(int i)
@@ -287,14 +283,9 @@ mask_add_delta(int i)
 static void
 init_mask_add_max_values(void)
 {
-#ifndef NDEBUG
-    FLOAT const _ma_max_i1 = pow(10, (I1LIMIT + 1) / 16.0);
-    FLOAT const _ma_max_i2 = pow(10, (I2LIMIT + 1) / 16.0);
-    FLOAT const _ma_max_m = pow(10, (MLIMIT) / 10.0);
-    assert(fabs(ma_max_i1 - _ma_max_i1) <= FLT_EPSILON);
-    assert(fabs(ma_max_i2 - _ma_max_i2) <= FLT_EPSILON);
-    assert(fabs(ma_max_m  - _ma_max_m ) <= FLT_EPSILON);
-#endif
+    ma_max_i1 = pow(10, (I1LIMIT + 1) / 16.0);
+    ma_max_i2 = pow(10, (I2LIMIT + 1) / 16.0);
+    ma_max_m = pow(10, (MLIMIT) / 10.0);
 }
 
 
@@ -1862,7 +1853,7 @@ init_s3_values(FLOAT ** p, int (*s3ind)[2], int npart,
         s3ind[i][1] = j;
         numberOfNoneZero += (s3ind[i][1] - s3ind[i][0] + 1);
     }
-    *p = lame_calloc(FLOAT, numberOfNoneZero);
+    *p = malloc(sizeof(FLOAT) * numberOfNoneZero);
     if (!*p)
         return -1;
 
@@ -1899,7 +1890,7 @@ psymodel_init(lame_global_flags const *gfp)
     }
     memset(norm, 0, sizeof(norm));
 
-    gd = lame_calloc(PsyConst_t, 1);
+    gd = calloc(1, sizeof(PsyConst_t));
     gfc->cd_psy = gd;
 
     gd->force_short_block_calc = gfp->experimentalZ;

@@ -18,20 +18,22 @@ android {
             cmake {
                 cppFlags ""
             }
+            ndk {
+                abiFilters  "armeabi-v7a" //, "armeabi-v7a"
+            }
         }
 
 
 
-        ndk {
-            moduleName "jni-test"
-            // 设置支持的SO库架构
-            abiFilters  'armeabi-v7a'
-        }
+//        ndk {
+//            moduleName "jni-test"
+//            // 设置支持的SO库架构
+//            abiFilters  'armeabi-v7a'
+//        }
         sourceSets {
             main {
                 //mk
 //                jni.srcDirs = []
-                //使用mk生成的so包需要指定路径
 //                jniLibs.srcDirs = ['libs']
             }
         }
@@ -81,6 +83,6 @@ dependencies {
     kapt rootProject.ext.annotationProcessorLibs
 
     //leakCanary
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.5'
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.5'
 
 }

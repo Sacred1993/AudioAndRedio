@@ -24,6 +24,10 @@
 
 #include "version.h"
 
+#if (LAME_RELEASE_VERSION == 0)
+#undef NDEBUG
+#endif
+
 #include <stdio.h>
 #include <assert.h>
 
@@ -31,19 +35,15 @@
 # include <stdlib.h>
 # include <string.h>
 #else
-/*
-# ifndef HAVE_STRCHR
+/*# ifndef HAVE_STRCHR
 #  define strchr index
 #  define strrchr rindex
-# endif
- */
+# endif*/
 char   *strchr(), *strrchr();
-/*
-# ifndef HAVE_MEMCPY
+/*# ifndef HAVE_MEMCPY
 #  define memcpy(d, s, n) bcopy ((s), (d), (n))
 #  define memmove(d, s, n) bcopy ((s), (d), (n))
-# endif
- */
+# endif*/
 #endif
 
 #if  defined(__riscos__)  &&  defined(FPA10)
@@ -161,13 +161,7 @@ typedef FLOAT sample_t;
 
 #define dimension_of(array) (sizeof(array)/sizeof(array[0]))
 #define beyond(array) (array+dimension_of(array))
-#define compiletime_assert(expression) enum{static_assert_##FILE##_##LINE = 1/((expression)?1:0)}
-#define lame_calloc(TYPE, COUNT) ((TYPE*)calloc(COUNT, sizeof(TYPE)))
-#define multiple_of(CHUNK, COUNT) (\
-  ( (COUNT) < 1 || (CHUNK) < 1 || (COUNT) % (CHUNK) == 0 ) \
-  ? (COUNT) \
-  : ((COUNT) + (CHUNK) - (COUNT) % (CHUNK)) \
-  )
+#define compiletime_assert(expression) extern char static_assert_##FILE##_##LINE[expression?1:0]
 
 #if 1
 #define EQ(a,b) (\
@@ -180,6 +174,8 @@ typedef FLOAT sample_t;
 
 #define NEQ(a,b) (!EQ(a,b))
 
+#endif
+
 #ifdef _MSC_VER
 #  if _MSC_VER < 1400
 #  define fabsf fabs
@@ -188,6 +184,5 @@ typedef FLOAT sample_t;
 #  endif
 #endif
 
-#endif
 
 /* end of machine.h */

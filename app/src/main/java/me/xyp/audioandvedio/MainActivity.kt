@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         stop_record_btn.setOnClickListener {
             AudioRecordManager.instance.stopRecording()
         }
+        testffmpeg()
     }
 
     private fun createMp3SaveFile(saveMp3FullName: String): File {
@@ -43,18 +44,22 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun test() {
-        SimpleLame.init(44100, 1, 44100, 32)
-        val jniTest = JniTest()
-        println(jniTest.get())
-        textView.text = jniTest.get() + ">>>" + stringFromJNI() + ">>>"
+//        SimpleLame.init(44100, 1, 44100, 32)
+//        val jniTest = JniTest()
+//        println(jniTest.get())
+//        textView.text = jniTest.get() + ">>>" + stringFromJNI() + ">>>"
     }
 
-    external fun stringFromJNI(): String
+    private fun testffmpeg(){
+        textView.text ="hello"+ffmpegInfo()
+    }
 
+//    external fun stringFromJNI(): String
+    private external fun ffmpegInfo(): String
     companion object {
         // Used to load the 'native-lib' library on application startup.
         init {
-//            System.loadLibrary("native-lib")
+            System.loadLibrary("native-lib")
 //            System.loadLibrary("jni-test")
 //            System.loadLibrary("lamemp3")
         }
